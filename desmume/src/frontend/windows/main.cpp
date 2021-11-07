@@ -1290,10 +1290,7 @@ static void StepRunLoop_Core()
 	DRV_AviFileWriteStart();
 
 	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
-
-	const NDSDisplayInfo& dispInfo = GPU->GetDisplayInfo();
-	UpdateScreenReader(dispInfo.masterCustomBuffer, dispInfo.customWidth, dispInfo.customHeight);
-
+	UpdateScreenReader(GPU->GetDisplayInfo());
 	ServiceDisplayThreadInvocations();
 }
 

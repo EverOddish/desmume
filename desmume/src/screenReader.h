@@ -1,5 +1,5 @@
 #pragma once
 
-#include "types.h"
+#include "GPU.h"
 
-void UpdateScreenReader( void* screenBuffer, u32 rows, u32 columns );
+void UpdateScreenReader(const NDSDisplayInfo& displayInfo);
