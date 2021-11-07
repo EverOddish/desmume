@@ -92,6 +92,7 @@
 #include "winutil.h"
 #include "ogl.h"
 #include "display.h"
+#include "screenReader.h"
 
 //tools and dialogs
 #include "pathsettings.h"
@@ -1289,6 +1290,10 @@ static void StepRunLoop_Core()
 	DRV_AviFileWriteStart();
 
 	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
+
+	const NDSDisplayInfo& dispInfo = GPU->GetDisplayInfo();
+	UpdateScreenReader(dispInfo.masterCustomBuffer, dispInfo.customWidth, dispInfo.customHeight);
+
 	ServiceDisplayThreadInvocations();
 }
 

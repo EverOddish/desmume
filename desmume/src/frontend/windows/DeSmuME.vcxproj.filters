@@ -930,6 +930,7 @@
     <ClCompile Include="display.cpp">
       <Filter>frontend\Windows</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\screenReader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\utils\guid.h">
@@ -1628,6 +1629,7 @@
     <ClInclude Include="display.h">
       <Filter>frontend\Windows</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\screenReader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bitmap1.bmp">

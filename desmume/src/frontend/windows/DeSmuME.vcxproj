@@ -51,6 +51,25 @@
     <Import Project="desmume.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Link>
+      <AdditionalDependencies>vfw32.lib;winmm.lib;opengl32.lib;glu32.lib;ws2_32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;shlwapi.lib;comctl32.lib;%(AdditionalDependencies);ChatotLib.lib;opencv_core454.lib</AdditionalDependencies>
+      <AdditionalOptions>/LIBPATH:..\..\..\..\..\Chatot\build\Debug /LIBPATH:..\..\..\..\..\opencv\build\lib\Release %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>.;..\..;lua\include;glib-2.20.1\build;.\zlib128;.\zziplib;.\winpcap;userconfig;defaultconfig;.\agg\include;.\agg\examples;directx;File_Extractor;..\..\libretro-common\include;%(AdditionalIncludeDirectories);..\..\..\..\..\Chatot\include</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Link>
+      <AdditionalDependencies>vfw32.lib;winmm.lib;opengl32.lib;glu32.lib;ws2_32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;shlwapi.lib;comctl32.lib;%(AdditionalDependencies);ChatotLib.lib;opencv_core454.lib;ippicvmt.lib;ittnotify.lib</AdditionalDependencies>
+      <AdditionalOptions>/LIBPATH:..\..\..\..\..\Chatot\build\Release /LIBPATH:..\..\..\..\..\opencv\build\lib\Release /LIBPATH:..\..\..\..\..\opencv\build\3rdparty\ippicv\ippicv_win\icv\lib\intel64 /LIBPATH:..\..\..\..\..\opencv\build\3rdparty\lib\Release %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+    <ClCompile>
+      <AdditionalIncludeDirectories>.;..\..;lua\include;glib-2.20.1\build;.\zlib128;.\zziplib;.\winpcap;userconfig;defaultconfig;.\agg\include;.\agg\examples;directx;File_Extractor;..\..\libretro-common\include;%(AdditionalIncludeDirectories);..\..\..\..\..\Chatot\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\addons\slot1comp_mc.cpp" />
     <ClCompile Include="..\..\addons\slot1comp_protocol.cpp" />
@@ -133,6 +152,7 @@
     <ClCompile Include="..\..\ROMReader.cpp" />
     <ClCompile Include="..\..\rtc.cpp" />
     <ClCompile Include="..\..\saves.cpp" />
+    <ClCompile Include="..\..\screenReader.cpp" />
     <ClCompile Include="..\..\slot1.cpp" />
     <ClCompile Include="..\..\slot2.cpp" />
     <ClCompile Include="..\..\SPU.cpp" />
@@ -376,6 +396,7 @@
     <ClInclude Include="..\..\libretro-common\include\libretro.h" />
     <ClInclude Include="..\..\libretro-common\include\rthreads\rthreads.h" />
     <ClInclude Include="..\..\metaspu\SoundTouch\FIRFilter.h" />
+    <ClInclude Include="..\..\screenReader.h" />
     <ClInclude Include="..\..\types.h" />
     <ClInclude Include="..\..\utils\bits.h" />
     <ClInclude Include="..\..\utils\colorspacehandler\colorspacehandler_AltiVec.h">
