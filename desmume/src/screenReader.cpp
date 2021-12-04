@@ -4,10 +4,15 @@
 #include "screenReader.h"
 #include "chatot_lib.h"
 
+void InitializeScreenReader()
+{
+	ChatotLib_Initialize();
+}
+
 void UpdateScreenReader(const NDSDisplayInfo& displayInfo)
 {
 	std::string text;
-	CLColourFormat format;
+	CLColourFormat format = BGR555;
 
 	switch(displayInfo.colorFormat)
 	{
@@ -23,4 +28,8 @@ void UpdateScreenReader(const NDSDisplayInfo& displayInfo)
 	}
 
 	ChatotLib_GetTextFromScreen(displayInfo.masterCustomBuffer, displayInfo.customWidth, displayInfo.customHeight, format, text);
+	if (text.length() > 0)
+	{
+		std::cout << text << std::endl;
+	}
 }

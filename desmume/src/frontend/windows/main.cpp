@@ -2543,6 +2543,8 @@ int _main()
 	if(cmdline.windowed_fullscreen)
 		ToggleFullscreen();
 
+	InitializeScreenReader();
+
 	//DEBUG TEST HACK
 	//driver->VIEW3D_Init();
 	//driver->view3d->Launch();
