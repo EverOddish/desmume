@@ -27,9 +27,20 @@ void UpdateScreenReader(const NDSDisplayInfo& displayInfo)
 			break;
 	}
 
-	ChatotLib_GetTextFromScreen(displayInfo.masterCustomBuffer, displayInfo.customWidth, displayInfo.customHeight, format, text);
-	if (text.length() > 0)
+	for (int i = 0; i < 2; i++)
 	{
-		std::cout << text << std::endl;
+		if (displayInfo.didPerformCustomRender[i])
+		{
+			ChatotLib_GetTextFromScreen(displayInfo.customBuffer[i], displayInfo.customWidth, displayInfo.customHeight, format, text);
+		}
+		else
+		{
+			ChatotLib_GetTextFromScreen(displayInfo.nativeBuffer16[i], GPU_FRAMEBUFFER_NATIVE_WIDTH, GPU_FRAMEBUFFER_NATIVE_HEIGHT, format, text);
+		}
+
+		if (text.length() > 0)
+		{
+			std::cout << text << std::endl;
+		}
 	}
 }
