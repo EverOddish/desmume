@@ -2,6 +2,6 @@
 
 #include "GPU.h"
 
-void InitializeScreenReader();
+void InitializeScreenReader(HWND parentWindow, HINSTANCE hInstance);
 
 void UpdateScreenReader(const NDSDisplayInfo& displayInfo);

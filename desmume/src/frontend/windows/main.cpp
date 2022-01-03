@@ -2543,7 +2543,7 @@ int _main()
 	if(cmdline.windowed_fullscreen)
 		ToggleFullscreen();
 
-	InitializeScreenReader();
+	InitializeScreenReader(MainWindow->getHWnd(), hAppInst);
 
 	//DEBUG TEST HACK
 	//driver->VIEW3D_Init();
