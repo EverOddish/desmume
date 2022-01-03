@@ -5,6 +5,8 @@
 #include "chatot_lib.h"
 
 static uint64_t g_stepCounter = 0;
+static std::string g_lastText;
+static std::string g_textBuffer;
 
 void InitializeScreenReader()
 {
@@ -45,12 +47,50 @@ void UpdateScreenReader(const NDSDisplayInfo& displayInfo)
 
 			if (text.length() > 0)
 			{
-				std::cout << "Original text: " << text << std::endl;
+				//std::cout << "Original text: " << text << std::endl;
 
 				std::string outText;
 				ChatotLib_CorrectText(text, outText);
 
-				std::cout << "Correctd text: " << outText << std::endl;
+				//std::cout << "Correctd text: " << outText << std::endl;
+
+				if (g_lastText == outText)
+				{
+					outText = "";
+				}
+				else
+				{
+					int i = 0;
+					for (i = 0; i < outText.length(); i++)
+					{
+						if (g_lastText[i] != outText[i])
+						{
+							outText = outText.substr(i);
+							break;
+						}
+					}
+				}
+
+				if (outText.length() > 0)
+				{
+					g_textBuffer += outText;
+					g_lastText = outText;
+
+					if (g_textBuffer.length() > 500)
+					{
+						size_t cursor = 0;
+
+						// Delete first ten words
+						for (int i = 0; i < 10 && cursor != std::string::npos; i++)
+						{
+							cursor = g_textBuffer.find(" ", cursor);
+						}
+
+						g_textBuffer = g_textBuffer.substr(cursor);
+					}
+
+					std::cout << "Text buffer: " << g_textBuffer << std::endl;
+				}
 			}
 		}
 	}
