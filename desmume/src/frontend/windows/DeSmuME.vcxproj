@@ -62,8 +62,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalDependencies>vfw32.lib;winmm.lib;opengl32.lib;glu32.lib;ws2_32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;shlwapi.lib;comctl32.lib;%(AdditionalDependencies);ChatotLib.lib;opencv_core454.lib;ippicvmt.lib;ittnotify.lib;opencv_imgproc454.lib;opencv_imgcodecs454.lib;opencv_highgui454.lib;ippiw.lib;tesseract50.lib;IlmImf.lib</AdditionalDependencies>
-      <AdditionalOptions>/LIBPATH:..\..\..\..\..\Chatot\build\Release /LIBPATH:..\..\..\..\..\opencv\build\lib\Release /LIBPATH:..\..\..\..\..\opencv\build\3rdparty\ippicv\ippicv_win\icv\lib\intel64 /LIBPATH:..\..\..\..\..\opencv\build\3rdparty\lib\Release /LIBPATH:..\..\..\..\..\tesseract\build\Release %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>vfw32.lib;winmm.lib;opengl32.lib;glu32.lib;ws2_32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;shlwapi.lib;comctl32.lib;%(AdditionalDependencies);ChatotLib.lib;opencv_core454.lib;ippicvmt.lib;ittnotify.lib;opencv_imgproc454.lib;opencv_imgcodecs454.lib;opencv_highgui454.lib;ippiw.lib;tesseract50.lib;IlmImf.lib;nuspell.lib</AdditionalDependencies>
+      <AdditionalOptions>/LIBPATH:..\..\..\..\..\Chatot\build\Release /LIBPATH:..\..\..\..\..\opencv\build\lib\Release /LIBPATH:..\..\..\..\..\opencv\build\3rdparty\ippicv\ippicv_win\icv\lib\intel64 /LIBPATH:..\..\..\..\..\opencv\build\3rdparty\lib\Release /LIBPATH:..\..\..\..\..\tesseract\build\Release /LIBPATH:..\..\..\..\..\nuspell\build\src\nuspell\Release %(AdditionalOptions)</AdditionalOptions>
       <LinkTimeCodeGeneration>UseFastLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <ClCompile>
