@@ -1,5 +1,9 @@
+#include <stdlib.h>
 #include <string>
 #include <iostream>
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 #include <Windows.h>
 
@@ -8,11 +12,24 @@
 
 #define ID_EDITCHILD 100
 
-static uint64_t g_stepCounter = 0;
+typedef struct
+{
+	void* buffer;
+	uint32_t width;
+	uint32_t height;
+	CLColourFormat format;
+} UpdateInfo;
+
+void DoUpdateWork();
+
+using namespace std::chrono_literals;
+
+static std::mutex g_mutex;
 static std::string g_lastText;
 static std::string g_textBuffer;
 static HWND g_textWindow = NULL;
 static HWND g_editControl = NULL;
+static UpdateInfo* g_updateInfo[2] = { 0 };
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -64,8 +81,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void InitializeScreenReader(HWND parentWindow, HINSTANCE hInstance)
 {
-	ChatotLib_Initialize();
-
 	const char CLASS_NAME[] = "DeSmuME Screen Reader Class";
 
 	WNDCLASS wc = { };
@@ -99,91 +114,159 @@ void InitializeScreenReader(HWND parentWindow, HINSTANCE hInstance)
 	{
 		std::cout << "Failed to create window!" << std::endl;
 	}
+
+	std::thread t(DoUpdateWork);
+	t.detach();
+}
+
+UpdateInfo* MakeUpdateInfo(void* buffer, uint32_t width, uint32_t height, uint32_t bytesPerPixel, CLColourFormat format)
+{
+	UpdateInfo* info = (UpdateInfo*) malloc(sizeof(UpdateInfo));
+
+	if (info)
+	{
+		uint32_t bufferSize = width * height * bytesPerPixel;
+
+		info->buffer = malloc(bufferSize);
+		if (info->buffer)
+		{
+			memcpy(info->buffer, buffer, bufferSize);
+		}
+		info->width = width;
+		info->height = height;
+		info->format = format;
+	}
+
+	return info;
+}
+
+void FreeUpdateInfo(UpdateInfo* info)
+{
+	if (info)
+	{
+		if (info->buffer)
+		{
+			free(info->buffer);
+		}
+
+		free(info);
+	}
+}
+
+void DoUpdateWork()
+{
+	ChatotLib_Initialize();
+
+	while (1)
+	{
+		g_mutex.lock();
+
+		for (int i = 0; i < 2; i++)
+		{
+			if (g_updateInfo[ i ])
+			{
+				std::string text;
+
+				ChatotLib_GetTextFromScreen(g_updateInfo[ i ]->buffer,
+											g_updateInfo[ i ]->width,
+											g_updateInfo[ i ]->height,
+											g_updateInfo[ i ]->format,
+											text);
+				if (text.length() > 0)
+				{
+					//std::cout << "Original text: " << text << std::endl;
+
+					std::string outText;
+					ChatotLib_CorrectText(text, outText);
+
+					//std::cout << "Correctd text: " << outText << std::endl;
+
+					if (g_lastText == outText)
+					{
+						outText = "";
+					}
+					else
+					{
+						int i = 0;
+						for (i = 0; i < outText.length(); i++)
+						{
+							if (g_lastText[i] != outText[i])
+							{
+								outText = outText.substr(i);
+								break;
+							}
+						}
+					}
+
+					if (outText.length() > 0)
+					{
+						g_textBuffer += outText;
+						g_lastText = outText;
+
+						if (g_textBuffer.length() > 500)
+						{
+							size_t cursor = 0;
+
+							// Delete first ten words
+							for (int i = 0; i < 10 && cursor != std::string::npos; i++)
+							{
+								cursor = g_textBuffer.find(" ", cursor);
+							}
+
+							g_textBuffer = g_textBuffer.substr(cursor);
+						}
+
+						//std::cout << "Text buffer: " << g_textBuffer << std::endl;
+
+						SendMessage(g_editControl, WM_SETTEXT, 0, (LPARAM)g_textBuffer.c_str());
+					}
+				}
+
+				FreeUpdateInfo(g_updateInfo[ i ]);
+				g_updateInfo[ i ] = NULL;
+			}
+		}
+
+		g_mutex.unlock();
+
+		// Give a chance for the next frame
+		std::this_thread::sleep_for(50ms);
+	}
 }
 
 void UpdateScreenReader(const NDSDisplayInfo& displayInfo)
 {
-	// Perform OCR every 5 steps
-	if (0 == g_stepCounter % 5)
+	/*
+	CLColourFormat format = BGR555;
+
+	switch (displayInfo.colorFormat)
 	{
-		std::string text;
-		CLColourFormat format = BGR555;
+	case NDSColorFormat_BGR555_Rev:
+		format = BGR555;
+		break;
+	case NDSColorFormat_BGR666_Rev:
+		format = BGR666;
+		break;
+	case NDSColorFormat_BGR888_Rev:
+		format = BGR888;
+		break;
+	}
+	*/
 
-		switch (displayInfo.colorFormat)
-		{
-		case NDSColorFormat_BGR555_Rev:
-			format = BGR555;
-			break;
-		case NDSColorFormat_BGR666_Rev:
-			format = BGR666;
-			break;
-		case NDSColorFormat_BGR888_Rev:
-			format = BGR888;
-			break;
-		}
-
+	if (g_mutex.try_lock())
+	{
 		for (int i = 0; i < 2; i++)
 		{
 			if (displayInfo.didPerformCustomRender[i])
 			{
-				ChatotLib_GetTextFromScreen(displayInfo.customBuffer[i], displayInfo.customWidth, displayInfo.customHeight, format, text);
+				g_updateInfo[ i ] = MakeUpdateInfo(displayInfo.customBuffer[i], displayInfo.customWidth, displayInfo.customHeight, displayInfo.pixelBytes, BGR888);
 			}
 			else
 			{
-				ChatotLib_GetTextFromScreen(displayInfo.nativeBuffer16[i], GPU_FRAMEBUFFER_NATIVE_WIDTH, GPU_FRAMEBUFFER_NATIVE_HEIGHT, format, text);
-			}
-
-			if (text.length() > 0)
-			{
-				//std::cout << "Original text: " << text << std::endl;
-
-				std::string outText;
-				ChatotLib_CorrectText(text, outText);
-
-				//std::cout << "Correctd text: " << outText << std::endl;
-
-				if (g_lastText == outText)
-				{
-					outText = "";
-				}
-				else
-				{
-					int i = 0;
-					for (i = 0; i < outText.length(); i++)
-					{
-						if (g_lastText[i] != outText[i])
-						{
-							outText = outText.substr(i);
-							break;
-						}
-					}
-				}
-
-				if (outText.length() > 0)
-				{
-					g_textBuffer += outText;
-					g_lastText = outText;
-
-					if (g_textBuffer.length() > 500)
-					{
-						size_t cursor = 0;
-
-						// Delete first ten words
-						for (int i = 0; i < 10 && cursor != std::string::npos; i++)
-						{
-							cursor = g_textBuffer.find(" ", cursor);
-						}
-
-						g_textBuffer = g_textBuffer.substr(cursor);
-					}
-
-					//std::cout << "Text buffer: " << g_textBuffer << std::endl;
-
-					SendMessage(g_editControl, WM_SETTEXT, 0, (LPARAM)g_textBuffer.c_str());
-				}
+				g_updateInfo[ i ] = MakeUpdateInfo(displayInfo.nativeBuffer16[i], GPU_FRAMEBUFFER_NATIVE_WIDTH, GPU_FRAMEBUFFER_NATIVE_HEIGHT, displayInfo.pixelBytes, BGR888);
 			}
 		}
-	}
 
-	g_stepCounter++;
+		g_mutex.unlock();
+	}
 }
