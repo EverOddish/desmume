@@ -92,15 +92,15 @@ void InitializeScreenReader(HWND parentWindow, HINSTANCE hInstance)
 	RegisterClass(&wc);
 
 	g_textWindow = CreateWindowEx(
-		0,                              // Optional window styles.
-		CLASS_NAME,                     // Window class
+		WS_EX_APPWINDOW,            // Optional window styles.
+		CLASS_NAME,                 // Window class
 		"DeSmuME Screen Reader",    // Window text
-		WS_OVERLAPPEDWINDOW,            // Window style
+		WS_OVERLAPPEDWINDOW,        // Window style
 
 		// Size and position
 		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
 
-		parentWindow,       // Parent window    
+		NULL,       // Parent window    
 		NULL,       // Menu
 		hInstance,  // Instance handle
 		NULL        // Additional application data
