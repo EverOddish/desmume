@@ -174,6 +174,8 @@ void DoUpdateWork()
 											text);
 				if (text.length() > 0)
 				{
+					std::string newText;
+
 					//std::cout << "Original text: " << text << std::endl;
 
 					std::string outText;
@@ -183,24 +185,24 @@ void DoUpdateWork()
 
 					if (g_lastText == outText)
 					{
-						outText = "";
+						newText = "";
 					}
 					else
 					{
 						int i = 0;
 						for (i = 0; i < outText.length(); i++)
 						{
-							if (g_lastText[i] != outText[i])
+							if (tolower(g_lastText[i]) != tolower(outText[i]))
 							{
-								outText = outText.substr(i);
+								newText = outText.substr(i);
 								break;
 							}
 						}
 					}
 
-					if (outText.length() > 0)
+					if (newText.length() > 0)
 					{
-						g_textBuffer += outText;
+						g_textBuffer += newText;
 						g_lastText = outText;
 
 						if (g_textBuffer.length() > 500)
