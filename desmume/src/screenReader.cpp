@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <chrono>
+#include <algorithm>
 
 #include <Windows.h>
 
@@ -153,6 +154,16 @@ void FreeUpdateInfo(UpdateInfo* info)
 	}
 }
 
+void replaceAll(std::string& str, const std::string& from, const std::string& to) {
+	if (from.empty())
+		return;
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+	}
+}
+
 void DoUpdateWork()
 {
 	ChatotLib_Initialize();
@@ -172,29 +183,36 @@ void DoUpdateWork()
 											g_updateInfo[ i ]->height,
 											g_updateInfo[ i ]->format,
 											text);
+				replaceAll(text, "\n", "");
+
+				while (0 == text.find(" "))
+				{
+					text.replace(text.begin(), text.begin() + 1, "");
+				}
+
 				if (text.length() > 0)
 				{
 					std::string newText;
 
 					//std::cout << "Original text: " << text << std::endl;
 
-					std::string outText;
-					ChatotLib_CorrectText(text, outText);
+					//std::string outText;
+					//ChatotLib_CorrectText(text, outText);
 
 					//std::cout << "Correctd text: " << outText << std::endl;
 
-					if (g_lastText == outText)
+					if (g_lastText == text)
 					{
 						newText = "";
 					}
 					else
 					{
 						int i = 0;
-						for (i = 0; i < outText.length(); i++)
+						for (i = 0; i < text.length(); i++)
 						{
-							if (tolower(g_lastText[i]) != tolower(outText[i]))
+							if (tolower(g_lastText[i]) != tolower(text[i]))
 							{
-								newText = outText.substr(i);
+								newText = text.substr(i);
 								break;
 							}
 						}
@@ -202,8 +220,10 @@ void DoUpdateWork()
 
 					if (newText.length() > 0)
 					{
+						//std::cout << "New text: " << newText << std::endl;
+
 						g_textBuffer += newText;
-						g_lastText = outText;
+						g_lastText = text;
 
 						if (g_textBuffer.length() > 500)
 						{
